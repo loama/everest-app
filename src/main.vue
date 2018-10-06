@@ -18,7 +18,9 @@
     </div>
 
     <div id="home" v-bind:class="{active: qr.reading}">
-      <button v-on:click="openRestaurant()">hola</button>
+      <!-- <button v-on:click="openRestaurant()">hola</button> -->
+      <img src="./assets/images/preview.png">
+      <div class="text">Go ahead and look for QR codes, you can see restaurant menus, order food and pay!</div>
     </div>
 
     <div id="modal-overlay" v-on:click="closeResultModal()" v-bind:class="{active: qr.result !== ''}">
@@ -95,8 +97,18 @@
         </div>
       </div>
 
-      <div class="pay-button">
+      <div class="pay-button" v-on:click="createFingerPrint()">
         Pay ${{qr.basketTotal.toFixed(2)}}
+      </div>
+
+      <div class="payment-confirmation" v-bind:class="{active: qr.paymentSuccess}">
+        Thanks for your payment!
+
+        <div class="close-button" v-on:click="closeConfirmation()">
+          <div class="text">close</div>
+          <div class="timer" v-bind:class="{zero: qr.paymentSuccess}"></div>
+          <div class="timer-background"></div>
+        </div>
       </div>
 
     </div>
@@ -128,7 +140,8 @@ export default {
         basketNumberOfProducts: 0,
         basketTotal: 0,
         basketOpen: false,
-        cardActive: 1
+        cardActive: 1,
+        paymentSuccess: false
       }
     }
   },
@@ -239,6 +252,97 @@ export default {
     },
     openBasket () {
       this.qr.basketOpen = true
+    },
+    authenticateFingerprint () {
+      var decryptConfig = {
+        clientId: "myAppName",
+        username: "currentUser",
+        token: "c2RmZGZzZGZkc2Zld2ZnNHc="
+      };
+
+      FingerprintAuth.decrypt(decryptConfig, successCallback, errorCallback);
+
+      function successCallback(result) {
+          console.log("successCallback(): " + JSON.stringify(result));
+          if (result.withFingerprint) {
+              alert("ok");
+              if (result.password) {
+                  console.log("Successfully decrypted credential token.");
+                  console.log("password: " + result.password);
+              }
+          } else if (result.withBackup) {
+              alert("ok");
+          }
+      }
+
+      function errorCallback(error) {
+          if (error === FingerprintAuth.ERRORS.FINGERPRINT_CANCELLED) {
+              alert("FingerprintAuth Dialog Cancelled!");
+          } else {
+              alert('ok')
+          }
+      }
+    },
+    closeConfirmation () {
+      this.qr.reading = false,
+      this.qr.result = '',
+      this.qr.resultApi = {
+        code: '',
+        name: '',
+        color: '',
+        logo: '',
+        sections: [],
+        products: []
+      },
+      this.qr.basket = [],
+      this.qr.basketNumberOfProducts = 0,
+      this.qr.basketTotal = 0,
+      this.qr.basketOpen = false,
+      this.qr.paymentSuccess = false
+    },
+    createFingerPrint () {
+      var encryptConfig = {
+        clientId: "myAppName",
+        username: "currentUser",
+        password: "currentUserPassword"
+      };
+      var self = this
+      FingerprintAuth.encrypt(encryptConfig, successCallback, errorCallback);
+
+      function successCallback(result) {
+        self.qr.paymentSuccess = true
+        setTimeout(function () {
+          self.qr.reading = false,
+          self.qr.result = '',
+          self.qr.resultApi = {
+            code: '',
+            name: '',
+            color: '',
+            logo: '',
+            sections: [],
+            products: []
+          },
+          self.qr.basket = [],
+          self.qr.basketNumberOfProducts = 0,
+          self.qr.basketTotal = 0,
+          self.qr.basketOpen = false,
+          self.qr.paymentSuccess = false
+        }, 3000)
+        if (result.withFingerprint) {
+            console.log("Successfully encrypted credentials.");
+            console.log("Encrypted credentials: " + result.token);
+        } else if (result.withBackup) {
+            console.log("Authenticated with backup password");
+        }
+      }
+
+      function errorCallback(error) {
+          if (error === FingerprintAuth.ERRORS.FINGERPRINT_CANCELLED) {
+              console.log("FingerprintAuth Dialog Cancelled!");
+          } else {
+              console.log("FingerprintAuth Error: " + error);
+          }
+      }
     }
   },
   mounted () {
@@ -265,7 +369,7 @@ export default {
     left: 0;
     height: 28px;
     width: 100vw;
-    background: #106230;
+    background: #3353C8;
   }
 
   #lines {
@@ -338,9 +442,10 @@ export default {
   #header .title {
     font-family: 'MontserratThin';
     font-size: 20px;
-    color: #4A4A4A;
+    color: #3353C8;
     line-height: 56px;
     letter-spacing: -0.5px;
+    font-weight: 600;
   }
 
   .scan {
@@ -377,11 +482,25 @@ export default {
     top: 56px;
     left: 0;
     height: calc(100vh - 136px);
-    padding: 40px 8px;
+    padding: 64px 16px;
     width: calc(100vw - 16px);
     background: #FFFFFF;
     transform: translate3d(0, 0, 0);
     transition: all 0.3s;
+    font-size: 40px;
+    font-weight: 600;
+    color: #3353C8;
+  }
+
+  #home img {
+    position: absolute;
+    top: 0;
+    left: -50%;
+    z-index: -1;
+  }
+
+  #home > div.text {
+    font-size: 32px;
   }
 
   #home.active {
@@ -710,6 +829,70 @@ export default {
     text-align: center;
     line-height: 44px;
     border-radius: 4px;
+  }
+
+  #basket-modal .payment-confirmation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(80,250,100, 0.97);
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 24px;
+    text-align: center;
+    line-height: 120px;
+    display: none;
+  }
+
+  #basket-modal .payment-confirmation.active {
+    display: block;
+  }
+
+  .close-button {
+    position: relative;
+    height: 56px;
+    width: 120px;
+    margin-left: calc(50% - 60px);
+    background: #FFFFFF;
+    color: green;
+    border-radius: 4px;
+  }
+
+  .close-button .text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    line-height: 56px;
+    width: 120px;
+  }
+
+  .close-button .timer {
+    position: absolute;
+    z-index: 20000;
+    left: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: #090;
+    border-radius: 0 0 2px 2px;
+    transition: all 3s;
+  }
+
+  .close-button .timer.zero {
+    width: 1%;
+  }
+
+  .close-button .timer-background {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: #E0E0E0;
+    border-radius: 0 0 2px 2px;
   }
 
   .animated {

@@ -47,6 +47,7 @@
         "cordova-browser": "^4.1.0",
         "cordova-ios": "^4.4.0",
         "cordova-plugin-add-swift-support": "^1.7.2",
+        "cordova-plugin-android-fingerprint-auth": "^1.4.5",
         "cordova-plugin-compat": "^1.2.0",
         "cordova-plugin-qrscanner": "^2.6.0",
         "cordova-plugin-statusbar": "^2.4.2",
@@ -65,7 +66,8 @@
             "cordova-plugin-whitelist": {},
             "cordova-plugin-statusbar": {},
             "cordova-plugin-qrscanner": {},
-            "cordova-plugin-compat": {}
+            "cordova-plugin-compat": {},
+            "cordova-plugin-android-fingerprint-auth": {}
         },
         "platforms": [
             "android",

@@ -18,6 +18,9 @@
         },
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.everest.app"
+        },
+        "cordova-plugin-android-fingerprint-auth": {
+            "PACKAGE_NAME": "com.everest.app"
         }
     },
     "dependent_plugins": {

@@ -27,6 +27,14 @@ module.exports = [
         "id": "cordova-plugin-qrscanner.QRScannerProxy",
         "pluginId": "cordova-plugin-qrscanner",
         "runs": true
+    },
+    {
+        "file": "plugins/cordova-plugin-android-fingerprint-auth/www/FingerprintAuth.js",
+        "id": "cordova-plugin-android-fingerprint-auth.FingerprintAuth",
+        "pluginId": "cordova-plugin-android-fingerprint-auth",
+        "clobbers": [
+            "FingerprintAuth"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -35,7 +43,8 @@ module.exports.metadata =
     "cordova-plugin-whitelist": "1.3.3",
     "cordova-plugin-statusbar": "2.4.2",
     "cordova-plugin-qrscanner": "2.6.0",
-    "cordova-plugin-compat": "1.2.0"
+    "cordova-plugin-compat": "1.2.0",
+    "cordova-plugin-android-fingerprint-auth": "1.4.5"
 }
 // BOTTOM OF METADATA
 });
