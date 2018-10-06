@@ -4,12 +4,21 @@
     <div id="statusbar"></div>
     <div id="header" v-bind:class="{active: qr.reading}">
       <div class="scan" v-on:click="startReading()">
-        <img src="./assets/images/qr.svg">
+        <img class="qr" src="./assets/images/qr.svg">
+        <img class="close" src="./assets/images/close.svg">
       </div>
       <div class="title">everest</div>
     </div>
 
+    <div id="lines">
+      <div class="first horizontal"></div>
+      <div class="second horizontal"></div>
+      <div class="first vertical"></div>
+      <div class="second vertical"></div>
+    </div>
+
     <div id="home" v-bind:class="{active: qr.reading}">
+      hola {{qr.result}}
     </div>
 
     <div id="modal-overlay">
@@ -21,12 +30,14 @@
 </template>
 <script>
 // Import Routes...
+let audioSuccess = new Audio('/static/NFCSuccess.ogg')
 
 export default {
   data() {
     return {
       qr: {
-        reading: false
+        reading: false,
+        result: ''
       }
     }
   },
@@ -57,9 +68,14 @@ export default {
       }
     },
     startReading () {
-      this.qr.reading = true
-      QRScanner.show()
-      QRScanner.scan(this.qrResult)
+      if (this.qr.reading) {
+        this.qr.reading = false
+        this.qr.result = ''
+      } else {
+        this.qr.reading = true
+        QRScanner.show()
+        QRScanner.scan(this.qrResult)
+      }
     },
     qrResult (err, text) {
       if(err){
@@ -67,7 +83,8 @@ export default {
         alert(err)
       } else {
         // The scan completed, display the contents of the QR code:
-        alert(text)
+        // audioSuccess.play()
+        this.qr.result = text
         // QRScanner.hide()
         this.qr.reading = false
       }
@@ -91,20 +108,69 @@ export default {
     z-index: 10001;
     top: 0;
     left: 0;
-    height: 24px;
+    height: 28px;
     width: 100vw;
-    background: #1651AB;
+    background: #114AB9;
+  }
+
+  #lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    z-index: -1;
+  }
+
+  #lines .first.horizontal {
+    position: absolute;
+    top: 20vh;
+    left: 0;
+    height: 1px;
+    width: 100vw;
+    background: #FFFFFF;
+    opacity: 0.3;
+  }
+
+  #lines .second.horizontal {
+    position: absolute;
+    top: 40vh;
+    left: 0;
+    height: 1px;
+    width: 100vw;
+    background: #FFFFFF;
+    opacity: 0.3;
+  }
+
+  #lines .first.vertical {
+    position: absolute;
+    top: 28px;
+    left: 33vw;
+    height: 60vh;
+    width: 1px;
+    background: #FFFFFF;
+    opacity: 0.3;
+  }
+
+  #lines .second.vertical {
+    position: absolute;
+    top: 28px;
+    left: 66vw;
+    height: 60vh;
+    width: 1px;
+    background: #FFFFFF;
+    opacity: 0.3;
   }
 
   #header {
     position: fixed;
     z-index: 10000;
-    top: 24px;
+    top: 28px;
     left: 0;
     height: 56px;
     width: 100vw;
-    border-bottom: 1px solid #E0E0E0;
-    background: #1651AB;
+    border-bottom: 1px solid #F0F0F0;
+    background: #FFFFFF;
     transform: translate3d(0, 0, 0);
     transition: all 0.3s;
     text-align: center;
@@ -116,7 +182,10 @@ export default {
 
   #header .title {
     font-family: 'MontserratThin';
-    font-size: 16px;
+    font-size: 20px;
+    color: #4A4A4A;
+    line-height: 56px;
+    letter-spacing: -0.5px;
   }
 
   .scan {
@@ -133,6 +202,18 @@ export default {
     left: 16px;
     height: 24px;
     width: 24px;
+    transition: all 0.3s;
+  }
+  .scan img.close {
+    opacity: 0
+  }
+
+  #header.active .scan img.qr {
+    opacity: 0;
+  }
+
+  #header.active .scan img.close {
+    opacity: 1;
   }
 
   #home {
@@ -140,6 +221,7 @@ export default {
     top: 56px;
     left: 0;
     height: calc(100vh - 56px);
+    padding: 40px 8px;
     width: 100vw;
     background: #FFFFFF;
     transform: translate3d(0, 0, 0);
