@@ -18,6 +18,7 @@
     </div>
 
     <div id="home" v-bind:class="{active: qr.reading}">
+      <button v-on:click="openRestaurant()">hola</button>
     </div>
 
     <div id="modal-overlay" v-on:click="closeResultModal()" v-bind:class="{active: qr.result !== ''}">
@@ -39,7 +40,10 @@
             <span>{{section}}</span>
             <div class="active-indicator"></div>
           </div>
-          <div class="section basket"></div>
+          <div class="section basket" v-on:click="openBasket()">
+            <div class="numberOfProducts">{{qr.basketNumberOfProducts}}</div>
+            <img src="./assets/images/shopping_basket.svg">
+          </div>
         </div>
       </div>
       <div class="product-sections" v-bind:style="{width: qr.productSectionsWidth, transform: qr.sectionsOffset}">
@@ -51,9 +55,36 @@
                <div class="title">{{product.name}}</div>
                <div class="description">{{product.description}}</div>
                <div class="price">${{product.price}}</div>
+               <div class="add" v-on:click="add(product.name)">
+                 <img src="./assets/images/add.svg">
+               </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <div id="basket-overlay" v-bind:class="{active: qr.basketOpen}" v-on:click="qr.basketOpen = false"></div>
+
+    <div id="basket-modal" v-bind:class="{active: qr.basketOpen}">
+      <div class="products">
+        <div class="title">Products</div>
+
+        <div class="product" v-for="product in qr.basket">
+          <img :src="product.img">
+          <div class="title">{{product.name}}</div>
+          <div class="description">{{product.description}}</div>
+          <div class="amount">({{product.amount}} x {{product.price}})</div>
+          <div class="price">{{product.amount * parseFloat(product.price)}}</div>
+        </div>
+      </div>
+
+      <div class="cards">
+      </div>
+
+      <div class="pay-button">
+        Pay ${{qr.basketTotal}}
+      </div>
+
     </div>
   </div>
 </template>
@@ -78,7 +109,11 @@ export default {
         },
         activeSection: '',
         sectionsWidth: '0',
-        sectionsOffset: '0'
+        sectionsOffset: '0',
+        basket: [],
+        basketNumberOfProducts: 0,
+        basketTotal: 0,
+        basketOpen: false
       }
     }
   },
@@ -149,6 +184,42 @@ export default {
       this.qr.activeSectionIndex = this.qr.resultApi.sections.indexOf(section)
       this.qr.sectionsOffset = 'translate3d(-' + (this.qr.activeSectionIndex * 100).toString() + 'vw, 0, 0)'
       console.log(this.qr.sectionsOffset)
+    },
+    openRestaurant () {
+      var text = 'https://loteria.tech/t/a6TMr'
+      this.qr.result = text
+      var code = text.split('/')[4]
+      axios
+        .get('https://us-central1-loteria-api-3164c.cloudfunctions.net/menu/' + code)
+        .then(response => (this.processResult(response.data)))
+      // QRScanner.hide()
+      this.qr.reading = false
+    },
+    add (productName) {
+      var alreadyInBasket = false
+      var price = ''
+      for (var i = 0; i < this.qr.basket.length; i++) {
+        if (this.qr.basket[i].name === productName) {
+          this.qr.basket[i].amount = this.qr.basket[i].amount + 1
+          alreadyInBasket = true
+          price = this.qr.basket[i].price
+        }
+      }
+      if (!alreadyInBasket) {
+        for (var i = 0; i < this.qr.resultApi.products.length; i++) {
+          if (productName === this.qr.resultApi.products[i].name) {
+            price = this.qr.resultApi.products[i].price
+            var product = this.qr.resultApi.products[i]
+            product.amount = 1
+            this.qr.basket.push(product)
+          }
+        }
+      }
+      this.qr.basketTotal = this.qr.basketTotal + parseFloat(price)
+      this.qr.basketNumberOfProducts = this.qr.basketNumberOfProducts + 1
+    },
+    openBasket () {
+      this.qr.basketOpen = true
     }
   },
   mounted () {
@@ -162,6 +233,10 @@ export default {
   @font-face {
     font-family: 'MontserratThin';
     src: url('./assets/fonts/Montserrat-Thin.otf');
+  }
+
+  .app {
+    font-family: 'MontserratThin'
   }
 
   #statusbar {
@@ -313,12 +388,12 @@ export default {
   #restaurant-modal {
     position: fixed;
     z-index: 1002;
-    top: 40vh;
+    top: 24px;
     left: 0;
     min-height: 100vh;
     width: 100vw;
     background: #FFFFFF;
-    transform: translate3d(0, 60vh, 0);
+    transform: translate3d(0, 100vh, 0);
     transition: all 0.3s ease;
   }
 
@@ -385,16 +460,26 @@ export default {
     position: fixed;
     top: 0;
     left: 0;
-    background: #b3b3b3;
     height: 56px;
     width: 64px;
-    opacity: 0.9;
+  }
+
+  #restaurant-modal .sections .section.basket .numberOfProducts {
+    position: absolute;
+    top: -12px;
+    left: 44px;
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  #restaurant-modal .sections .section.basket img {
+    margin: 24px 16px 16px 16px;
   }
 
   #restaurant-modal .product-sections {
     position: relative;
     min-height: 200px;
-    max-height: 40vh;
+    max-height: calc(100vh - 136px);
     transform: translate3d(0, 0, 0);
     transition: all 0.3s;
   }
@@ -403,7 +488,7 @@ export default {
     display: inline-block;
     vertical-align: top;
     width: 100vw;
-    max-height: calc(60vh - 112px);
+    max-height: calc(100vh - 136px);
     overflow-y: scroll;
   }
 
@@ -436,8 +521,140 @@ export default {
 
   #restaurant-modal .product-sections .product-section .product .price {
     position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+
+  #restaurant-modal .product-sections .product-section .product .add {
+    position: absolute;
     top: 40px;
+    right: 20px;
+    height: 40px;
+    width: 40px;
+    border-radius: 20px;
+    background: #0A0;
+  }
+
+  #restaurant-modal .product-sections .product-section .product .add img {
+    height: 24px;
+    width: 24px;
+  }
+
+  #basket-overlay {
+    position: fixed;
+    z-index: 1999;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background: #000000;
+    opacity: 0.85;
+    display: none;
+  }
+
+  #basket-overlay.active {
+    display: block;
+  }
+
+  #basket-modal {
+    position: fixed;
+    z-index: 2000;
+    bottom: 0;
+    left: 0;
+    min-height: 272px;
+    width: 100vw;
+    background: #FFFFFF;
+    transition: all 0.3s;
+    transform: translate3d(0, 100vh, 0);
+  }
+
+  #basket-modal.active {
+    transform: translate3d(0, 0, 0);
+  }
+
+  #basket-modal .products {
+    padding-top: 8px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 148px;
+  }
+
+  #basket-modal .products > .title {
+    font-size: 20px;
+    font-weight: 600;
+    width: 100%;
+    border-bottom: 1px solid #E0E0E0;
+    height: 32px;
+  }
+
+  #basket-modal .products .product {
+    position: relative;
+    height: 80px;
+    margin-bottom: 12px;
+  }
+
+  #basket-modal .products .product img {
+    height: 80px;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+  }
+
+  #basket-modal .products .product .title {
+    position: absolute;
+    top: 8px;
+    left: 128px;
+    font-weight: 600;
+  }
+
+  #basket-modal .products .product .description {
+    position: absolute;
+    top: 32px;
+    left: 128px;
+    max-width: calc(100% - 200px);
+    text-align: left;
+    max-height: 60px;
+    overflow: hidden;
+  }
+
+  #basket-modal .products .product .price {
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  #basket-modal .products .product .amount {
+    position: absolute;
+    top: 28px;
     right: 8px;
+  }
+
+  .cards {
+    position: absolute;
+    bottom: 80px;
+    left: 16px;
+    height: 44px;
+    width: calc(100% - 32px);
+    background: gray;
+  }
+
+  .pay-button {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    height: 44px;
+    width: calc(100% - 32px);
+    background: green;
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 44px;
+    border-radius: 4px;
   }
 
   .animated {
