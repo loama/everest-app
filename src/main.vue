@@ -1,7 +1,7 @@
 <template>
   <!-- App -->
   <div class="app">
-    <div id="header">
+    <div id="header" v-bind:class="{active: qr.reading}">
       <div class="scan" v-on:click="startReading()">
         <img src="./assets/images/qr.svg">
       </div>
@@ -15,7 +15,9 @@
 export default {
   data() {
     return {
-      msg: ''
+      qr: {
+        reading: false
+      }
     }
   },
   methods: {
