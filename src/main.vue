@@ -18,7 +18,6 @@
     </div>
 
     <div id="home" v-bind:class="{active: qr.reading}">
-      hola {{qr.result}}
     </div>
 
     <div id="modal-overlay" v-on:click="closeResultModal()" v-bind:class="{active: qr.result !== ''}">
@@ -27,6 +26,9 @@
     <div id="restaurant-modal" v-bind:class="{active: qr.result !== ''}">
       <div class="header" v-bind:style="{background: qr.resultApi.color}">
         <img class="logo" :src="qr.resultApi.logo">
+        <div class="close" v-on:click="closeResultModal()">
+            <img src="./assets/images/close-white.svg">
+        </div>
       </div>
       <div class="navigation">
         <div class="sections" v-bind:style="{width: qr.sectionsWidth}">
@@ -44,9 +46,11 @@
         <div v-for="productSection in qr.resultApi.sections" class="product-section">
           <div class="product"
                v-for="product in qr.resultApi.products"
-               v-if="product.section = productSection">
-               {{productSection}}
-               {{product.name}}
+               v-if="productSection === product.section">
+               <img :src="product.img">
+               <div class="title">{{product.name}}</div>
+               <div class="description">{{product.description}}</div>
+               <div class="price">${{product.price}}</div>
           </div>
         </div>
       </div>
@@ -117,6 +121,7 @@ export default {
     processResult (result) {
       this.qr.resultApi = result
       this.qr.activeSection = result.sections[0]
+      this.changeProductSection(result.sections[0])
       this.qr.sectionsWidth = (result.sections.length * 112).toString() + 'px'
       this.qr.productSectionsWidth = (result.sections.length * 100).toString() + 'vw'
     },
@@ -333,6 +338,18 @@ export default {
     margin: 8px auto;
   }
 
+  #restaurant-modal .header .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 56px;
+    width: 56px;
+  }
+
+  #restaurant-modal .header .close img {
+    margin: 16px;
+  }
+
   #restaurant-modal .navigation {
     position: relative;
     height: 56px;
@@ -375,15 +392,52 @@ export default {
   }
 
   #restaurant-modal .product-sections {
+    position: relative;
     min-height: 200px;
+    max-height: 40vh;
     transform: translate3d(0, 0, 0);
     transition: all 0.3s;
   }
 
   #restaurant-modal .product-sections .product-section {
-    min-height: 200px;
+    display: inline-block;
+    vertical-align: top;
     width: 100vw;
-    border-left: 1px solid blue;
+    max-height: calc(60vh - 112px);
+    overflow-y: scroll;
+  }
+
+  #restaurant-modal .product-sections .product-section .product {
+    position: relative;
+  }
+
+  #restaurant-modal .product-sections .product-section .product img {
+    height: 80px;
+    margin: 8px;
+    max-width: 120px;
+  }
+
+  #restaurant-modal .product-sections .product-section .product .title {
+    position: absolute;
+    top: 8px;
+    left: 128px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  #restaurant-modal .product-sections .product-section .product .description {
+    position: absolute;
+    top: 32px;
+    left: 128px;
+    max-width: calc(100% - 200px);
+    overflow: hidden;
+    max-height: 60px;
+  }
+
+  #restaurant-modal .product-sections .product-section .product .price {
+    position: absolute;
+    top: 40px;
+    right: 8px;
   }
 
   .animated {
