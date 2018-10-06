@@ -96,7 +96,7 @@
       </div>
 
       <div class="pay-button">
-        Pay ${{qr.basketTotal}}
+        Pay ${{qr.basketTotal.toFixed(2)}}
       </div>
 
     </div>
@@ -174,6 +174,10 @@ export default {
       this.changeProductSection(result.sections[0])
       this.qr.sectionsWidth = (result.sections.length * 112).toString() + 'px'
       this.qr.productSectionsWidth = (result.sections.length * 100).toString() + 'vw'
+      this.qr.basket = []
+      this.qr.basketNumberOfProducts = 0
+      this.qr.basketTotal = 0
+      this.qr.basketOpen = false
     },
     qrResult (err, text) {
       if(err){
@@ -600,7 +604,7 @@ export default {
     font-size: 20px;
     font-weight: 600;
     width: 100%;
-    border-bottom: 1px solid #E0E0E0;
+    border-bottom: 1px solid #F0F0F0;
     height: 32px;
   }
 
