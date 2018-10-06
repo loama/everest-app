@@ -7,16 +7,16 @@
         "files": {}
     },
     "installed_plugins": {
-        "cordova-plugin-whitelist": {
-            "PACKAGE_NAME": "com.everest.app"
-        },
-        "cordova-plugin-statusbar": {
+        "cordova-plugin-compat": {
             "PACKAGE_NAME": "com.everest.app"
         },
         "cordova-plugin-qrscanner": {
             "PACKAGE_NAME": "com.everest.app"
         },
-        "cordova-plugin-compat": {
+        "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "com.everest.app"
+        },
+        "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.everest.app"
         }
     },

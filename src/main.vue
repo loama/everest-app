@@ -29,11 +29,25 @@
         <img class="logo" :src="qr.resultApi.logo">
       </div>
       <div class="navigation">
-        <div class="sections">
-          <div v-for="section in qr.resultApi.sections" class="section">
-            {{section}}
+        <div class="sections" v-bind:style="{width: qr.sectionsWidth}">
+          <div v-for="section in qr.resultApi.sections"
+               v-on:click="changeProductSection(section)"
+               v-bind:class="{active: qr.activeSection === section}"
+               class="section">
+            <span>{{section}}</span>
+            <div class="active-indicator"></div>
           </div>
           <div class="section basket"></div>
+        </div>
+      </div>
+      <div class="product-sections" v-bind:style="{width: qr.productSectionsWidth, transform: qr.sectionsOffset}">
+        <div v-for="productSection in qr.resultApi.sections" class="product-section">
+          <div class="product"
+               v-for="product in qr.resultApi.products"
+               v-if="product.section = productSection">
+               {{productSection}}
+               {{product.name}}
+          </div>
         </div>
       </div>
     </div>
@@ -57,7 +71,10 @@ export default {
           logo: '',
           sections: [],
           products: []
-        }
+        },
+        activeSection: '',
+        sectionsWidth: '0',
+        sectionsOffset: '0'
       }
     }
   },
@@ -97,6 +114,12 @@ export default {
         QRScanner.scan(this.qrResult)
       }
     },
+    processResult (result) {
+      this.qr.resultApi = result
+      this.qr.activeSection = result.sections[0]
+      this.qr.sectionsWidth = (result.sections.length * 112).toString() + 'px'
+      this.qr.productSectionsWidth = (result.sections.length * 100).toString() + 'vw'
+    },
     qrResult (err, text) {
       if(err){
         // an error occurred, or the scan was canceled (error code `6`)
@@ -108,13 +131,19 @@ export default {
         var code = text.split('/')[4]
         axios
           .get('https://us-central1-loteria-api-3164c.cloudfunctions.net/menu/' + code)
-          .then(response => (this.qr.resultApi = response.data))
+          .then(response => (this.processResult(response.data)))
         // QRScanner.hide()
         this.qr.reading = false
       }
     },
     closeResultModal () {
       this.qr.result = ''
+    },
+    changeProductSection (section) {
+      this.qr.activeSection = section
+      this.qr.activeSectionIndex = this.qr.resultApi.sections.indexOf(section)
+      this.qr.sectionsOffset = 'translate3d(-' + (this.qr.activeSectionIndex * 100).toString() + 'vw, 0, 0)'
+      console.log(this.qr.sectionsOffset)
     }
   },
   mounted () {
@@ -137,7 +166,7 @@ export default {
     left: 0;
     height: 28px;
     width: 100vw;
-    background: #114AB9;
+    background: #106230;
   }
 
   #lines {
@@ -307,32 +336,54 @@ export default {
   #restaurant-modal .navigation {
     position: relative;
     height: 56px;
-    width: calc(100vw - 96px);
+    width: 100vw;
     border-bottom: 1px solid #E0E0E0;
     overflow: auto;
   }
 
   #restaurant-modal .sections {
     position: absolute;
-    width: calc(100vw - 8px);
+    width: 400px;
   }
 
   #restaurant-modal .sections .section {
     height: 56px;
+    width: 80px;
     line-height: 56px;
     display: inline-block;
     padding: 0 16px;
-    color: #636363;
+    color: rgba(0, 0, 0, 0.4);
+    text-align: center;
+    transition: all 0.1s;
+    vertical-align: top;
+  }
+
+  #restaurant-modal .sections .section.active {
+    font-size: 24px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 1);
   }
 
   #restaurant-modal .sections .section.basket {
     position: fixed;
-    top: 56px;
-    right: 0;
+    top: 0;
+    left: 0;
     background: #b3b3b3;
-    height: 58px;
+    height: 56px;
     width: 64px;
     opacity: 0.9;
+  }
+
+  #restaurant-modal .product-sections {
+    min-height: 200px;
+    transform: translate3d(0, 0, 0);
+    transition: all 0.3s;
+  }
+
+  #restaurant-modal .product-sections .product-section {
+    min-height: 200px;
+    width: 100vw;
+    border-left: 1px solid blue;
   }
 
   .animated {
