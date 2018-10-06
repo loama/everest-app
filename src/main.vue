@@ -7,6 +7,15 @@
       </div>
       <div class="title">everest</div>
     </div>
+
+    <div id="home" v-bind:class="{active: qr.reading}">
+    </div>
+
+    <div id="modal-overlay">
+    </div>
+
+    <div id="restaurant-modal">
+    </div>
   </div>
 </template>
 <script>
@@ -46,8 +55,20 @@ export default {
       }
     },
     startReading () {
-      alert('startReading')
+      this.qr.reading = true
       QRScanner.show()
+      QRScanner.scan(this.qrResult)
+    },
+    qrResult (err, text) {
+      if(err){
+        // an error occurred, or the scan was canceled (error code `6`)
+        alert(err)
+      } else {
+        // The scan completed, display the contents of the QR code:
+        alert(text)
+        // QRScanner.hide()
+        this.qr.reading = false
+      }
     }
   },
   mounted () {
@@ -65,6 +86,13 @@ export default {
     height: 56px;
     width: 100vw;
     border-bottom: 1px solid #E0E0E0;
+    background: #FFFFFF;
+    transform: translate3d(0, 0, 0);
+    transition: all 0.3s;
+  }
+
+  #header.active {
+    transform: translate3d(0, 60vh, 0);
   }
 
   .scan {
@@ -81,5 +109,20 @@ export default {
     left: 16px;
     height: 24px;
     width: 24px;
+  }
+
+  #home {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    height: calc(100vh - 56px);
+    width: 100vw;
+    background: #FFFFFF;
+    transform: translate3d(0, 0, 0);
+    transition: all 0.3s;
+  }
+
+  #home.active {
+    transform: translate3d(0, 60vh, 0);
   }
 </style>
