@@ -79,6 +79,20 @@
       </div>
 
       <div class="cards">
+        <div class="card" v-bind:class="{active: qr.cardActive === 1}" v-on:click="qr.cardActive = 1">
+          <img src="./assets/images/visa.png">
+          <div class="last-4">8575</div>
+        </div>
+
+        <div class="card" v-bind:class="{active: qr.cardActive === 2}" v-on:click="qr.cardActive = 2">
+          <img src="./assets/images/mastercard.png">
+          <div class="last-4">9788</div>
+        </div>
+
+        <div class="card" v-bind:class="{active: qr.cardActive === 3}" v-on:click="qr.cardActive = 3">
+          <img src="./assets/images/american_express.png">
+          <div class="last-4">8786</div>
+        </div>
       </div>
 
       <div class="pay-button">
@@ -113,7 +127,8 @@ export default {
         basket: [],
         basketNumberOfProducts: 0,
         basketTotal: 0,
-        basketOpen: false
+        basketOpen: false,
+        cardActive: 1
       }
     }
   },
@@ -635,11 +650,47 @@ export default {
 
   .cards {
     position: absolute;
-    bottom: 80px;
+    bottom: 88px;
     left: 16px;
     height: 44px;
     width: calc(100% - 32px);
-    background: gray;
+  }
+
+  .card {
+    position: relative;
+    height: 56px;
+    width: 80px;
+    display: inline-block;
+    text-align: center;
+    border: 1px solid #E0E0E0;
+    margin-left: 8%;
+    border-radius: 4px;
+    vertical-align: top;
+  }
+
+  .card.active {
+    background: #1E88E5;
+    color: white;
+    font-weight: 600;
+  }
+
+  .card img {
+    height: 40px;
+  }
+
+  .card:nth-child(2) img {
+    position: absolute;
+    top: 4px;
+    left: 16px;
+    height: 30px;
+  }
+
+  .card .last-4 {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
   }
 
   .pay-button {
