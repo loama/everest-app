@@ -1,6 +1,7 @@
 <template>
   <!-- App -->
   <div class="app">
+    <div id="statusbar"></div>
     <div id="header" v-bind:class="{active: qr.reading}">
       <div class="scan" v-on:click="startReading()">
         <img src="./assets/images/qr.svg">
@@ -32,7 +33,8 @@ export default {
   methods: {
     deviceReady () {
       StatusBar.styleLightContent()
-      StatusBar.backgroundColorByHexString("#003FB9")
+      // StatusBar.backgroundColorByHexString("#003FB9")
+      StatusBar.overlaysWebView(true)
       QRScanner.prepare(this.qrPrepared) // show the prompt
     },
     qrPrepared (err, status){
@@ -78,21 +80,43 @@ export default {
 }
 </script>
 <style>
+
+  @font-face {
+    font-family: 'MontserratThin';
+    src: url('./assets/fonts/Montserrat-Thin.otf');
+  }
+
+  #statusbar {
+    position: fixed;
+    z-index: 10001;
+    top: 0;
+    left: 0;
+    height: 24px;
+    width: 100vw;
+    background: #1651AB;
+  }
+
   #header {
     position: fixed;
     z-index: 10000;
-    top: 0;
+    top: 24px;
     left: 0;
     height: 56px;
     width: 100vw;
     border-bottom: 1px solid #E0E0E0;
-    background: #FFFFFF;
+    background: #1651AB;
     transform: translate3d(0, 0, 0);
     transition: all 0.3s;
+    text-align: center;
   }
 
   #header.active {
     transform: translate3d(0, 60vh, 0);
+  }
+
+  #header .title {
+    font-family: 'MontserratThin';
+    font-size: 16px;
   }
 
   .scan {
@@ -124,5 +148,16 @@ export default {
 
   #home.active {
     transform: translate3d(0, 60vh, 0);
+  }
+
+  #modal-overlay {
+    position: fixed;
+    z-index: 1001;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background: #000000;
+    display: none;
   }
 </style>
