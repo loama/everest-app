@@ -117,6 +117,7 @@
 <script>
 import axios from 'axios'
 
+let audioClick = new Audio('/static/camera_click.ogg')
 let audioSuccess = new Audio('/static/NFCSuccess.ogg')
 
 export default {
@@ -198,7 +199,7 @@ export default {
         alert(err)
       } else {
         // The scan completed, display the contents of the QR code:
-        // audioSuccess.play()
+        audioClick.play()
         this.qr.result = text
         var code = text.split('/')[4]
         axios
@@ -310,6 +311,7 @@ export default {
       FingerprintAuth.encrypt(encryptConfig, successCallback, errorCallback);
 
       function successCallback(result) {
+        audioSuccess.play()
         self.qr.paymentSuccess = true
         setTimeout(function () {
           self.qr.reading = false,
