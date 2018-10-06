@@ -42,6 +42,7 @@
         "webpack-dev-server": "^2.4.1"
     },
     "dependencies": {
+        "axios": "^0.18.0",
         "cordova-android": "^6.2.3",
         "cordova-browser": "^4.1.0",
         "cordova-ios": "^4.5.5",
